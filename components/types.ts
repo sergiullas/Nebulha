@@ -11,4 +11,27 @@ export type CloudApplication = {
   environments: string[];
   health: HealthStatus;
   lastDeployment: string;
+  activeIncident: boolean;
+  aiSummary?: string;
+  recommendedAction?: string;
+};
+
+export type AppMetrics = {
+  errorRate: string;
+  latencyP95: string;
+  failedRequests: number;
+  deploymentVersion: string;
+};
+
+export type AppAiInsights = {
+  summary: string;
+  likelyCause: string;
+  nextStep: string;
+};
+
+export type AppLogsMetrics = {
+  appId: string;
+  metrics: AppMetrics;
+  logs: string[];
+  aiInsights: AppAiInsights;
 };
