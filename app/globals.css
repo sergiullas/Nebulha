@@ -158,6 +158,22 @@ a {
   color: #991b1b;
 }
 
+.incident-pill {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.env-pill {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.ai-inline {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: #1f2937;
+}
+
 .workspace-header {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -166,10 +182,49 @@ a {
   margin-bottom: 16px;
 }
 
+.health-summary {
+  margin-top: 8px;
+}
+
+.ai-summary-block {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.ai-summary-block p {
+  margin: 6px 0 0;
+  color: #1e3a8a;
+}
+
+.workspace-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #1f2937;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tab-pill.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .section-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
+  margin-bottom: 16px;
 }
 
 .section-card {
@@ -188,4 +243,75 @@ a {
   margin: 0;
   color: #4b5563;
   font-size: 0.9rem;
+}
+
+.logs-metrics-section {
+  margin-bottom: 16px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.metric-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.metric-label {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.metric-value {
+  margin: 6px 0 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.logs-card,
+.ai-interpretation {
+  margin-bottom: 12px;
+}
+
+.logs-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.action-panel {
+  margin-top: 8px;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.action-button {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.action-button.secondary {
+  background: #ffffff;
+  color: #1d4ed8;
 }

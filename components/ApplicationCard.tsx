@@ -17,8 +17,10 @@ export function ApplicationCard({ app }: ApplicationCardProps) {
       <div className="pill-row">
         <ProviderBadge provider={app.provider} />
         <HealthBadge health={app.health} />
+        {app.activeIncident && <span className="pill incident-pill">Incident Active</span>}
       </div>
       <div className="meta">Last deployment: {app.lastDeployment}</div>
+      {app.activeIncident && app.aiSummary && <p className="ai-inline">AI Insight: {app.aiSummary}</p>}
     </Link>
   );
 }

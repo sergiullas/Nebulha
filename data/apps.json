@@ -6,8 +6,11 @@
     "project": "Payments Revamp",
     "provider": "AWS",
     "environments": ["dev", "staging", "prod"],
-    "health": "warning",
-    "lastDeployment": "2h ago"
+    "health": "critical",
+    "lastDeployment": "18m ago",
+    "activeIncident": true,
+    "aiSummary": "Error spike likely tied to deployment v1.24.",
+    "recommendedAction": "Review timeout configuration or roll back to the previous stable version."
   },
   {
     "id": "forecast-engine",
@@ -17,6 +20,9 @@
     "provider": "GCP",
     "environments": ["dev", "prod"],
     "health": "healthy",
-    "lastDeployment": "1d ago"
+    "lastDeployment": "1d ago",
+    "activeIncident": false,
+    "aiSummary": "No active anomalies detected in current release.",
+    "recommendedAction": "Continue standard monitoring cadence."
   }
 ]

@@ -1,0 +1,40 @@
+[
+  {
+    "appId": "payments-api",
+    "metrics": {
+      "errorRate": "7.2%",
+      "latencyP95": "840ms",
+      "failedRequests": 184,
+      "deploymentVersion": "v1.24"
+    },
+    "logs": [
+      "[ERROR] Database connection timeout exceeded",
+      "[WARN] Retry threshold reached for payment request",
+      "[ERROR] Lambda execution exceeded configured timeout"
+    ],
+    "aiInsights": {
+      "summary": "Production instability started shortly after deployment v1.24.",
+      "likelyCause": "Timeout configuration change is the most likely trigger.",
+      "nextStep": "Roll back or compare timeout settings against the last stable release."
+    }
+  },
+  {
+    "appId": "forecast-engine",
+    "metrics": {
+      "errorRate": "0.2%",
+      "latencyP95": "210ms",
+      "failedRequests": 4,
+      "deploymentVersion": "v3.8"
+    },
+    "logs": [
+      "[INFO] Batch forecast job completed successfully",
+      "[INFO] Model drift check within expected threshold",
+      "[INFO] No retry events detected in the last hour"
+    ],
+    "aiInsights": {
+      "summary": "Operational baseline remains stable in production.",
+      "likelyCause": "No incident signal detected.",
+      "nextStep": "Keep observing routine metrics and deployment trends."
+    }
+  }
+]
