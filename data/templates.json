@@ -1,0 +1,643 @@
+[
+  {
+    "id": "scalable-rest-api",
+    "name": "Scalable REST API",
+    "type": "web-api",
+    "owner": "Cloud Platform Lead",
+    "version": "2.1.0",
+    "lastUpdated": "2026-03-10",
+    "purpose": "A production-ready REST API architecture with managed relational storage, caching, and async message handling. Designed for transactional workloads requiring consistent response times and horizontal scalability.",
+    "recommendedFor": [
+      "Transactional APIs with relational data models",
+      "Services with peak traffic variance requiring caching",
+      "Applications integrating with downstream async consumers"
+    ],
+    "notRecommendedFor": [
+      "Analytics or reporting workloads (use Data Pipeline template)",
+      "Event-sourced architectures (use Event-Driven template)",
+      "Simple CRUD with no scaling requirements (use Lightweight API template)"
+    ],
+    "services": [
+      {
+        "serviceId": "aws-rds",
+        "name": "AWS RDS (PostgreSQL)",
+        "role": "Primary relational database",
+        "required": true,
+        "provider": "AWS",
+        "governance": "approved",
+        "category": "Database"
+      },
+      {
+        "serviceId": "aws-elasticache",
+        "name": "AWS ElastiCache (Redis)",
+        "role": "Response cache and session store",
+        "required": true,
+        "provider": "AWS",
+        "governance": "approved",
+        "category": "Caching"
+      },
+      {
+        "serviceId": "aws-sqs",
+        "name": "AWS SQS",
+        "role": "Async task queue for background jobs",
+        "required": false,
+        "provider": "AWS",
+        "governance": "approved",
+        "category": "Messaging"
+      }
+    ],
+    "parameters": [
+      {
+        "id": "environment",
+        "label": "Environment",
+        "options": ["dev", "staging", "prod"],
+        "default": "dev",
+        "editable": true
+      },
+      {
+        "id": "region",
+        "label": "Region",
+        "options": ["us-east-1", "us-west-2", "eu-west-1"],
+        "default": "us-east-1",
+        "editable": true
+      },
+      {
+        "id": "rds_instance",
+        "label": "RDS instance size",
+        "options": ["db.t3.small", "db.t3.medium", "db.t3.large"],
+        "default": "db.t3.medium",
+        "editable": true
+      },
+      {
+        "id": "cache_node",
+        "label": "ElastiCache node type",
+        "options": ["cache.t3.micro", "cache.t3.small"],
+        "default": "cache.t3.micro",
+        "editable": true
+      },
+      {
+        "id": "provider",
+        "label": "Cloud provider",
+        "options": ["AWS"],
+        "default": "AWS",
+        "editable": false,
+        "lockedReason": "This template is certified for AWS only. Provider cannot be changed."
+      }
+    ],
+    "governanceState": "approved",
+    "approvedComponents": ["AWS RDS (PostgreSQL)", "AWS ElastiCache (Redis)", "AWS SQS"],
+    "restrictedOptions": [],
+    "requiresApprovalElements": [],
+    "policySources": ["Cloud Platform Security Baseline v3", "FinOps Tier-2 Cost Policy"],
+    "estimatedMonthlyCost": { "min": 180, "max": 420 },
+    "costDrivers": [
+      "RDS instance size (dominant cost driver)",
+      "ElastiCache node count and type",
+      "SQS message volume if queue is enabled"
+    ],
+    "scalingBehavior": "RDS scales vertically; ElastiCache supports horizontal read replicas. SQS scales automatically with message volume at no instance cost.",
+    "rationale": "This template encodes the standard ACME pattern for API services — a relational store for transactional integrity, a cache layer to absorb read traffic, and optional async queuing to offload background tasks. It eliminates setup variance across teams while keeping all services within pre-approved governance boundaries.",
+    "tradeoffs": [
+      "RDS requires schema migrations; not suitable for schema-free workloads",
+      "ElastiCache adds operational complexity for cache invalidation strategies",
+      "SQS is eventually consistent — not appropriate for synchronous workflows"
+    ],
+    "alternatives": [
+      "Event-Driven Microservice template — if your API is primarily event-sourced",
+      "Lightweight API template — if no caching or queuing is needed"
+    ],
+    "aiInsight": {
+      "fit": "Strong match for most application teams at ACME. All three services are fully pre-approved and proven in production across 14 internal services.",
+      "cost": "Cost is predictable and scales linearly. The $180–$420 range assumes moderate traffic; caching significantly reduces RDS load and cost at scale.",
+      "risk": "Low risk. No restricted services. All components are within FinOps-approved tiers. The only operational risk is RDS vertical scaling lag during traffic spikes.",
+      "confidence": 92,
+      "evidence": [
+        "Used by 14 ACME production services",
+        "Zero governance exceptions required in last 12 months",
+        "Average provisioning time: 18 minutes"
+      ]
+    },
+    "executionPreview": {
+      "resourcesCreated": [
+        "RDS PostgreSQL instance (db.t3.medium)",
+        "ElastiCache Redis cluster (cache.t3.micro, 1 node)",
+        "SQS standard queue (if enabled)",
+        "VPC security groups for each service",
+        "Parameter store entries for connection strings"
+      ],
+      "actionsPerformed": [
+        "IAM role binding for application service account",
+        "Automated connectivity test between services",
+        "Tagging with team, project, and environment labels"
+      ],
+      "integrationsTriggered": [
+        "FinOps cost allocation tag registration",
+        "Security baseline compliance scan"
+      ]
+    },
+    "provider": "AWS",
+    "complexity": "medium",
+    "tags": ["api", "relational", "caching", "aws", "approved"]
+  },
+  {
+    "id": "realtime-analytics-pipeline",
+    "name": "Real-Time Analytics Pipeline",
+    "type": "data-pipeline",
+    "owner": "Cloud Platform Lead",
+    "version": "1.4.0",
+    "lastUpdated": "2026-02-18",
+    "purpose": "A governed data pipeline architecture combining scalable object storage, a managed data warehouse, and an in-memory cache for low-latency query serving. Built for teams processing large datasets and serving analytical results to downstream consumers.",
+    "recommendedFor": [
+      "Analytics and reporting workloads over large datasets",
+      "Data pipelines producing aggregated results consumed by APIs",
+      "Teams requiring SQL-queryable data without managing infrastructure"
+    ],
+    "notRecommendedFor": [
+      "Transactional APIs (use Scalable REST API template)",
+      "Low-latency write-heavy workloads",
+      "Teams without a data engineering owner for pipeline maintenance"
+    ],
+    "services": [
+      {
+        "serviceId": "gcp-bigquery",
+        "name": "GCP BigQuery",
+        "role": "Managed data warehouse for analytical queries",
+        "required": true,
+        "provider": "GCP",
+        "governance": "requires-approval",
+        "category": "Analytics"
+      },
+      {
+        "serviceId": "gcp-cloud-storage",
+        "name": "GCP Cloud Storage",
+        "role": "Raw data ingestion and archival layer",
+        "required": true,
+        "provider": "GCP",
+        "governance": "approved",
+        "category": "Storage"
+      },
+      {
+        "serviceId": "gcp-memorystore",
+        "name": "GCP Memorystore (Redis)",
+        "role": "Query result cache for low-latency serving",
+        "required": false,
+        "provider": "GCP",
+        "governance": "approved",
+        "category": "Caching"
+      }
+    ],
+    "parameters": [
+      {
+        "id": "environment",
+        "label": "Environment",
+        "options": ["dev", "staging", "prod"],
+        "default": "dev",
+        "editable": true
+      },
+      {
+        "id": "region",
+        "label": "Region",
+        "options": ["us-central1", "europe-west1", "asia-east1"],
+        "default": "us-central1",
+        "editable": true
+      },
+      {
+        "id": "bq_location",
+        "label": "BigQuery dataset location",
+        "options": ["US", "EU"],
+        "default": "US",
+        "editable": true
+      },
+      {
+        "id": "storage_class",
+        "label": "Cloud Storage class",
+        "options": ["STANDARD", "NEARLINE"],
+        "default": "STANDARD",
+        "editable": true
+      },
+      {
+        "id": "data_residency",
+        "label": "Data residency policy",
+        "options": ["ACME-compliant regions only"],
+        "default": "ACME-compliant regions only",
+        "editable": false,
+        "lockedReason": "Data residency is locked by the Data Governance Policy v2. Contact the Platform team to request a residency exception."
+      }
+    ],
+    "governanceState": "requires-approval",
+    "approvedComponents": ["GCP Cloud Storage", "GCP Memorystore (Redis)"],
+    "restrictedOptions": [],
+    "requiresApprovalElements": ["GCP BigQuery"],
+    "policySources": ["Data Governance Policy v2", "FinOps Tier-3 Cost Policy", "Cloud Platform Security Baseline v3"],
+    "estimatedMonthlyCost": { "min": 340, "max": 1200 },
+    "costDrivers": [
+      "BigQuery query costs (per-TB scanned — dominant variable)",
+      "Cloud Storage volume and egress",
+      "Memorystore instance size if cache is enabled"
+    ],
+    "scalingBehavior": "BigQuery and Cloud Storage scale automatically with data volume. Costs are query-driven — partitioning and clustering are strongly recommended to control scan costs.",
+    "rationale": "This template provides a best-practice GCP analytics stack. BigQuery's serverless query engine eliminates cluster management overhead. Cloud Storage provides a cost-effective landing zone. The optional Memorystore layer serves aggregated results to APIs without re-querying BigQuery on every request.",
+    "tradeoffs": [
+      "BigQuery requires approval — provisioning timeline extends by 1–2 business days",
+      "Query costs are variable and require FinOps monitoring and query optimization",
+      "Not suitable for sub-second transactional operations"
+    ],
+    "alternatives": [
+      "Scalable REST API template — if you need a transactional store rather than analytics",
+      "Request a custom template via the Platform team for hybrid OLTP/OLAP requirements"
+    ],
+    "aiInsight": {
+      "fit": "Well-suited for analytics and data engineering workloads. BigQuery's approval requirement adds lead time but is consistently approved for data-owner teams.",
+      "cost": "Cost variability is high. Unoptimized queries can drive significant BigQuery costs. FinOps recommends partitioning tables by ingestion date before go-live.",
+      "risk": "Moderate. BigQuery requires approval and carries higher cost risk. Data residency locking prevents accidental policy violations.",
+      "confidence": 78,
+      "evidence": [
+        "Used by 6 ACME data teams",
+        "BigQuery approval granted in 100% of compliant requests",
+        "Avg approval time: 1.5 business days"
+      ]
+    },
+    "executionPreview": {
+      "resourcesCreated": [
+        "BigQuery dataset (pending approval)",
+        "Cloud Storage bucket with lifecycle policy",
+        "Memorystore Redis instance (if enabled)",
+        "IAM service account for pipeline workload",
+        "VPC Service Controls perimeter entry"
+      ],
+      "actionsPerformed": [
+        "BigQuery approval request submitted to Platform team",
+        "IAM role binding for data pipeline service account",
+        "Automated data residency compliance check"
+      ],
+      "integrationsTriggered": [
+        "FinOps cost anomaly alert configuration",
+        "Data Governance catalog registration"
+      ]
+    },
+    "provider": "GCP",
+    "complexity": "high",
+    "tags": ["analytics", "data", "bigquery", "gcp", "requires-approval"]
+  },
+  {
+    "id": "event-driven-microservice",
+    "name": "Event-Driven Microservice",
+    "type": "event-driven",
+    "owner": "Cloud Platform Lead",
+    "version": "1.8.0",
+    "lastUpdated": "2026-03-01",
+    "purpose": "An async-first microservice architecture using a NoSQL document store and a managed message queue. Designed for services that process events, handle async workflows, and require high write throughput with flexible schema evolution.",
+    "recommendedFor": [
+      "Async event processors and background workers",
+      "Services with high write throughput and schema flexibility",
+      "Microservices that publish or consume events from other services"
+    ],
+    "notRecommendedFor": [
+      "Workloads requiring ACID transactions across multiple records",
+      "Services with complex relational joins",
+      "Synchronous request-response APIs with no async component"
+    ],
+    "services": [
+      {
+        "serviceId": "aws-dynamodb",
+        "name": "AWS DynamoDB",
+        "role": "Primary NoSQL event store",
+        "required": true,
+        "provider": "AWS",
+        "governance": "approved",
+        "category": "NoSQL"
+      },
+      {
+        "serviceId": "aws-sqs",
+        "name": "AWS SQS",
+        "role": "Event ingestion and processing queue",
+        "required": true,
+        "provider": "AWS",
+        "governance": "approved",
+        "category": "Messaging"
+      }
+    ],
+    "parameters": [
+      {
+        "id": "environment",
+        "label": "Environment",
+        "options": ["dev", "staging", "prod"],
+        "default": "dev",
+        "editable": true
+      },
+      {
+        "id": "region",
+        "label": "Region",
+        "options": ["us-east-1", "us-west-2", "eu-west-1"],
+        "default": "us-east-1",
+        "editable": true
+      },
+      {
+        "id": "dynamodb_capacity",
+        "label": "DynamoDB capacity mode",
+        "options": ["On-demand", "Provisioned — 5 RCU / 5 WCU"],
+        "default": "On-demand",
+        "editable": true
+      },
+      {
+        "id": "sqs_type",
+        "label": "SQS queue type",
+        "options": ["Standard", "FIFO"],
+        "default": "Standard",
+        "editable": true
+      }
+    ],
+    "governanceState": "approved",
+    "approvedComponents": ["AWS DynamoDB", "AWS SQS"],
+    "restrictedOptions": [],
+    "requiresApprovalElements": [],
+    "policySources": ["Cloud Platform Security Baseline v3", "FinOps Tier-2 Cost Policy"],
+    "estimatedMonthlyCost": { "min": 60, "max": 280 },
+    "costDrivers": [
+      "DynamoDB read/write capacity units or on-demand request volume",
+      "SQS message count and data transfer"
+    ],
+    "scalingBehavior": "Both DynamoDB (on-demand mode) and SQS scale automatically with traffic. On-demand DynamoDB can absorb sudden burst traffic without pre-provisioning.",
+    "rationale": "The event-driven template is the lowest-friction path for async microservices at ACME. DynamoDB's on-demand pricing means you only pay for what you use, and SQS provides durable, scalable message delivery with no broker management. Both services are fully pre-approved.",
+    "tradeoffs": [
+      "DynamoDB's single-table design requires upfront access pattern planning",
+      "SQS Standard queues do not guarantee ordering — use FIFO for order-sensitive workflows",
+      "No relational query support; complex joins require application-level aggregation"
+    ],
+    "alternatives": [
+      "Scalable REST API template — if relational data integrity is required",
+      "Real-Time Analytics Pipeline — if events feed downstream analytics queries"
+    ],
+    "aiInsight": {
+      "fit": "Excellent fit for async-first and event-sourced architectures. The simplest approved template with the lowest baseline cost.",
+      "cost": "Cost-efficient at low and variable traffic volumes. On-demand DynamoDB eliminates over-provisioning risk.",
+      "risk": "Low risk. All services are pre-approved with no data residency restrictions. DynamoDB table design is the primary risk factor — poor key design leads to hot partitions.",
+      "confidence": 88,
+      "evidence": [
+        "Used by 9 ACME microservices",
+        "Lowest avg monthly cost of all approved templates",
+        "No governance exceptions in last 18 months"
+      ]
+    },
+    "executionPreview": {
+      "resourcesCreated": [
+        "DynamoDB table (on-demand capacity mode)",
+        "SQS queue (Standard or FIFO, as configured)",
+        "IAM role with least-privilege DynamoDB and SQS policy",
+        "Dead-letter queue for SQS (automatically attached)",
+        "Parameter store entries for table name and queue URL"
+      ],
+      "actionsPerformed": [
+        "IAM role binding for service account",
+        "Dead-letter queue configuration and alarm",
+        "Tagging with team, project, and environment labels"
+      ],
+      "integrationsTriggered": [
+        "FinOps cost allocation tag registration",
+        "Security baseline compliance scan"
+      ]
+    },
+    "provider": "AWS",
+    "complexity": "low",
+    "tags": ["event-driven", "nosql", "async", "aws", "approved"]
+  },
+  {
+    "id": "ml-inference-service",
+    "name": "ML Inference Service",
+    "type": "ml-inference",
+    "owner": "Cloud Platform Lead",
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-22",
+    "purpose": "An architecture for serving trained ML models via a scalable inference endpoint. Combines a managed data warehouse for feature storage, a NoSQL store for prediction caching, and object storage for model artefacts.",
+    "recommendedFor": [
+      "Teams serving trained ML models via synchronous or async endpoints",
+      "Inference workloads requiring low-latency feature retrieval",
+      "Projects with model artefacts requiring governed storage and versioning"
+    ],
+    "notRecommendedFor": [
+      "Online model training (not a training pipeline template)",
+      "Teams without a defined model deployment and versioning process",
+      "Simple rule-based scoring that does not require an ML model"
+    ],
+    "services": [
+      {
+        "serviceId": "gcp-bigquery",
+        "name": "GCP BigQuery",
+        "role": "Feature store and batch prediction input",
+        "required": true,
+        "provider": "GCP",
+        "governance": "requires-approval",
+        "category": "Analytics"
+      },
+      {
+        "serviceId": "gcp-cloud-storage",
+        "name": "GCP Cloud Storage",
+        "role": "Model artefact repository",
+        "required": true,
+        "provider": "GCP",
+        "governance": "approved",
+        "category": "Storage"
+      },
+      {
+        "serviceId": "gcp-memorystore",
+        "name": "GCP Memorystore (Redis)",
+        "role": "Inference result cache",
+        "required": false,
+        "provider": "GCP",
+        "governance": "approved",
+        "category": "Caching"
+      }
+    ],
+    "parameters": [
+      {
+        "id": "environment",
+        "label": "Environment",
+        "options": ["dev", "staging", "prod"],
+        "default": "dev",
+        "editable": true
+      },
+      {
+        "id": "region",
+        "label": "Region",
+        "options": ["us-central1", "europe-west1"],
+        "default": "us-central1",
+        "editable": true
+      },
+      {
+        "id": "model_storage_class",
+        "label": "Model artefact storage class",
+        "options": ["STANDARD", "NEARLINE"],
+        "default": "STANDARD",
+        "editable": true
+      },
+      {
+        "id": "data_residency",
+        "label": "Data residency policy",
+        "options": ["ACME-compliant regions only"],
+        "default": "ACME-compliant regions only",
+        "editable": false,
+        "lockedReason": "Data residency is locked by the Data Governance Policy v2. Contact the Platform team to request a residency exception."
+      }
+    ],
+    "governanceState": "requires-approval",
+    "approvedComponents": ["GCP Cloud Storage", "GCP Memorystore (Redis)"],
+    "restrictedOptions": [],
+    "requiresApprovalElements": ["GCP BigQuery"],
+    "policySources": ["Data Governance Policy v2", "ML Platform Policy v1", "Cloud Platform Security Baseline v3"],
+    "estimatedMonthlyCost": { "min": 290, "max": 950 },
+    "costDrivers": [
+      "BigQuery feature query costs (per-TB scanned)",
+      "Cloud Storage volume for model artefacts",
+      "Memorystore instance size if caching is enabled"
+    ],
+    "scalingBehavior": "Feature retrieval scales with BigQuery's serverless model. Model artefact storage costs scale with artefact count and size. Inference cache hit rate directly impacts BigQuery query frequency and cost.",
+    "rationale": "This template provides the standard ACME pattern for operationalizing ML models. Cloud Storage provides versioned, auditable model artefact storage. BigQuery handles feature retrieval at scale without managing a separate feature store. The optional Memorystore layer reduces repeated inference for identical inputs.",
+    "tradeoffs": [
+      "BigQuery approval adds 1–2 business days to provisioning lead time",
+      "Real-time feature freshness is limited by BigQuery's batch query model",
+      "Inference caching is only effective for high-repeat prediction inputs"
+    ],
+    "alternatives": [
+      "Real-Time Analytics Pipeline — if the primary output is analytics dashboards rather than model predictions",
+      "Contact the ML Platform team for custom streaming inference architectures"
+    ],
+    "aiInsight": {
+      "fit": "Appropriate for teams with an established model training workflow who are ready to operationalize. Requires ML Platform team sign-off alongside BigQuery approval.",
+      "cost": "Cost depends heavily on feature query volume. Enabling the inference cache and optimizing BigQuery partitioning can reduce costs by 40–60%.",
+      "risk": "Moderate. BigQuery approval required. ML Platform Policy v1 mandates model artefact retention and audit logging — verify your team's compliance posture before provisioning.",
+      "confidence": 71,
+      "evidence": [
+        "Used by 3 ACME ML teams",
+        "BigQuery approval granted for all compliant ML use cases",
+        "ML Platform Policy v1 compliance rate: 100% for provisioned teams"
+      ]
+    },
+    "executionPreview": {
+      "resourcesCreated": [
+        "BigQuery dataset for feature store (pending approval)",
+        "Cloud Storage bucket with versioning enabled",
+        "Memorystore Redis instance (if enabled)",
+        "IAM service account with least-privilege ML access",
+        "Cloud Storage lifecycle policy for artefact retention"
+      ],
+      "actionsPerformed": [
+        "BigQuery approval request submitted to Platform team",
+        "ML Platform Policy compliance check triggered",
+        "Model artefact retention policy applied"
+      ],
+      "integrationsTriggered": [
+        "ML Platform team notification",
+        "Data Governance catalog registration",
+        "FinOps cost anomaly alert configuration"
+      ]
+    },
+    "provider": "GCP",
+    "complexity": "high",
+    "tags": ["ml", "inference", "bigquery", "gcp", "requires-approval"]
+  },
+  {
+    "id": "lightweight-api",
+    "name": "Lightweight API",
+    "type": "web-api",
+    "owner": "Cloud Platform Lead",
+    "version": "3.0.0",
+    "lastUpdated": "2026-03-15",
+    "purpose": "A minimal, cost-effective API stack for simple CRUD services with modest traffic and no caching or async requirements. Provides a managed relational database without the overhead of a full cache and queue layer.",
+    "recommendedFor": [
+      "Simple CRUD APIs with predictable, modest traffic",
+      "Internal tooling services and admin dashboards",
+      "Prototypes and early-stage services before scaling requirements are known"
+    ],
+    "notRecommendedFor": [
+      "Services with peak traffic spikes (use Scalable REST API template)",
+      "Workloads with async processing needs",
+      "Production services expected to exceed 500 concurrent connections"
+    ],
+    "services": [
+      {
+        "serviceId": "gcp-cloud-sql",
+        "name": "GCP Cloud SQL (PostgreSQL)",
+        "role": "Primary relational database",
+        "required": true,
+        "provider": "GCP",
+        "governance": "approved",
+        "category": "Database"
+      }
+    ],
+    "parameters": [
+      {
+        "id": "environment",
+        "label": "Environment",
+        "options": ["dev", "staging", "prod"],
+        "default": "dev",
+        "editable": true
+      },
+      {
+        "id": "region",
+        "label": "Region",
+        "options": ["us-central1", "europe-west1", "asia-east1"],
+        "default": "us-central1",
+        "editable": true
+      },
+      {
+        "id": "sql_tier",
+        "label": "Cloud SQL tier",
+        "options": ["db-f1-micro", "db-g1-small", "db-n1-standard-1"],
+        "default": "db-g1-small",
+        "editable": true
+      }
+    ],
+    "governanceState": "approved",
+    "approvedComponents": ["GCP Cloud SQL (PostgreSQL)"],
+    "restrictedOptions": [],
+    "requiresApprovalElements": [],
+    "policySources": ["Cloud Platform Security Baseline v3", "FinOps Tier-1 Cost Policy"],
+    "estimatedMonthlyCost": { "min": 25, "max": 90 },
+    "costDrivers": [
+      "Cloud SQL instance tier (primary cost driver)",
+      "Storage volume and backup retention"
+    ],
+    "scalingBehavior": "Cloud SQL scales vertically. Horizontal read replicas can be added as traffic grows, but this template does not include them by default.",
+    "rationale": "The lightest approved template for relational workloads. Reduces setup time and cost for services that do not yet need caching or queuing. Designed to graduate to the Scalable REST API template when traffic or complexity increases.",
+    "tradeoffs": [
+      "No caching layer — all reads hit the database directly",
+      "No async queue — all processing is synchronous",
+      "Not designed for burst traffic; sustained high concurrency will require migration"
+    ],
+    "alternatives": [
+      "Scalable REST API template — when caching and async processing become necessary",
+      "Event-Driven Microservice template — if the workload is write-heavy with schema flexibility"
+    ],
+    "aiInsight": {
+      "fit": "Ideal for internal services, admin tools, and early-stage APIs. Not recommended for customer-facing services with unpredictable traffic.",
+      "cost": "Lowest cost of all approved templates. Predictable and easy to forecast. FinOps Tier-1 policy applies.",
+      "risk": "Very low risk. Single fully-approved service with no data residency restrictions. Primary operational risk is database connection exhaustion under unexpected traffic.",
+      "confidence": 95,
+      "evidence": [
+        "Used by 11 ACME internal services",
+        "100% compliance with FinOps Tier-1 policy",
+        "Average provisioning time: 8 minutes"
+      ]
+    },
+    "executionPreview": {
+      "resourcesCreated": [
+        "Cloud SQL PostgreSQL instance",
+        "Automated backup policy (7-day retention)",
+        "Private IP configuration within project VPC",
+        "Parameter store entry for connection string"
+      ],
+      "actionsPerformed": [
+        "IAM role binding for application service account",
+        "Database user creation with scoped permissions",
+        "Tagging with team, project, and environment labels"
+      ],
+      "integrationsTriggered": [
+        "FinOps cost allocation tag registration",
+        "Security baseline compliance scan"
+      ]
+    },
+    "provider": "GCP",
+    "complexity": "low",
+    "tags": ["api", "relational", "gcp", "approved", "lightweight"]
+  }
+]
