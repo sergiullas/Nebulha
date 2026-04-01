@@ -1,16 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { AIInsight } from '@/components/insightEngine';
 
-export type ApplicationInsight = {
-  id: string;
-  title: string;
-  description: string;
-  actionLabel: string;
-  actionType?: 'navigate' | 'modal' | 'scroll' | 'mock';
-  actionHref?: string;
-  severity?: 'low' | 'medium' | 'high';
-};
+export type ApplicationInsight = AIInsight;
 
 type ApplicationInsightsProps = {
   insights: ApplicationInsight[];
@@ -31,9 +24,16 @@ function ApplicationInsightItem({
           {insight.title}
         </h3>
         <p className="application-insight-description">{insight.description}</p>
+        <p className="application-insight-why">
+          <span className="application-insight-why-label">Based on:</span> {insight.why}
+        </p>
       </div>
       {insight.actionType === 'navigate' && insight.actionHref ? (
-        <Link href={insight.actionHref} className="application-insight-action">
+        <Link
+          href={insight.actionHref}
+          className="application-insight-action"
+          aria-label={`${insight.actionLabel} for ${insight.title}`}
+        >
           {insight.actionLabel}
         </Link>
       ) : (
