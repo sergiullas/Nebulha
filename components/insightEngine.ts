@@ -96,6 +96,15 @@ const sourceServiceId = (source: string) => {
   return serviceId;
 };
 
+
+const findServiceNameById = (catalogServices: CatalogService[], serviceId?: string) => {
+  if (!serviceId) {
+    return undefined;
+  }
+
+  return catalogServices.find((service) => service.id === serviceId)?.name;
+};
+
 const isConsistentWithCatalog = (insight: AIInsight, catalogServices: CatalogService[]) => {
   if (insight.type !== 'governance' && insight.type !== 'architecture') {
     return true;
@@ -150,13 +159,13 @@ export const buildApplicationInsights = ({
           ? `${highestGovernanceRisk.name} requires exception review`
           : `${highestGovernanceRisk.name} needs governance approval`,
       description: highestGovernanceRisk.detail.governanceExplanation,
-      why: highestGovernanceRisk.fit.appContext,
+      why: `Based on policy: ${highestGovernanceRisk.fit.appContext}`,
       recommendation:
         highestGovernanceRisk.alternativeId !== undefined
-          ? `Review ${highestGovernanceRisk.alternativeId} as the approved default for this application.`
+          ? `View ${findServiceNameById(catalogServices, highestGovernanceRisk.alternativeId) ?? 'the approved alternative'} before provisioning.`
           : `Open governance guidance before provisioning ${highestGovernanceRisk.name}.`,
       actionLabel:
-        highestGovernanceRisk.alternativeId !== undefined ? 'Review approved alternative' : 'Open governance guidance',
+        highestGovernanceRisk.alternativeId !== undefined ? 'View approved alternative' : 'Open governance guidance',
       actionType: 'navigate',
       actionHref: `/app/${application.id}/catalog/${highestGovernanceRisk.alternativeId ?? highestGovernanceRisk.id}`,
       confidence: highestGovernanceRisk.governance === 'discouraged' ? 0.95 : 0.83,
@@ -166,19 +175,41 @@ export const buildApplicationInsights = ({
   }
 
   const unhealthyDependencies = dependencies.filter((dep) => dep.health === 'Critical' || dep.health === 'Degraded');
-  if (environment === 'prod' && unhealthyDependencies.length > 0) {
+  const hasTransactionalDatabase = dependencies.some((dep) => /rds|postgres|mysql/i.test(dep.metadata));
+
+  if (!application.activeIncident && environment === 'prod' && unhealthyDependencies.length > 0) {
     insights.push({
       id: 'reliability-unhealthy-dependencies',
       type: 'reliability',
       severity: unhealthyDependencies.some((dep) => dep.health === 'Critical') ? 'high' : 'medium',
-      title: 'Production dependencies are degrading reliability',
+      title: 'Production dependencies need reliability attention',
       description: `${unhealthyDependencies.map((dep) => dep.name).join(', ')} currently report unhealthy states.`,
-      why: `Dependency health checks for ${environment} show ${unhealthyDependencies.length} unhealthy services.`,
-      recommendation: 'Review dependency health and mitigate failing services before the next deployment.',
-      actionLabel: 'Highlight affected dependencies',
+      why: `Based on operational trend: dependency health checks in ${environment} show ${unhealthyDependencies.length} unhealthy services.`,
+      recommendation: 'Open affected dependencies and prioritize mitigation before the next deployment.',
+      actionLabel: 'Open affected dependencies',
       actionType: 'suggest',
       confidence: unhealthyDependencies.some((dep) => dep.health === 'Critical') ? 0.9 : 0.8,
       source: 'ops:dependency-health',
+      createdAt,
+    });
+  }
+
+  if (application.activeIncident && environment === 'prod' && hasTransactionalDatabase) {
+    const databaseService = presentCatalogServices.find((service) => service.category === 'Database');
+
+    insights.push({
+      id: 'reliability-resilience-ha-gap',
+      type: 'reliability',
+      severity: 'high',
+      title: 'Production database is not configured for high availability',
+      description: 'Current production database posture should be validated for multi-zone failover readiness.',
+      why: 'Based on deployment configuration: single-AZ database in production increases outage risk.',
+      recommendation: 'Open database configuration and confirm high-availability settings before the next release.',
+      actionLabel: 'Open database configuration',
+      actionType: 'navigate',
+      actionHref: `/app/${application.id}/catalog/${databaseService?.id ?? 'amazon-rds'}`,
+      confidence: 0.85,
+      source: 'ops:resilience-pattern',
       createdAt,
     });
   }
@@ -191,12 +222,12 @@ export const buildApplicationInsights = ({
       severity: 'medium',
       title: `${notRecommendedService.name} is a weak architecture fit`,
       description: notRecommendedService.fit.basis,
-      why: notRecommendedService.fit.appContext,
+      why: `Based on workload pattern: ${notRecommendedService.fit.appContext}`,
       recommendation:
         notRecommendedService.alternativeId !== undefined
-          ? `Evaluate ${notRecommendedService.alternativeId} to align with this workload pattern.`
+          ? `Switch to ${findServiceNameById(catalogServices, notRecommendedService.alternativeId) ?? 'the approved alternative'} for this workload pattern.`
           : `Reassess the selected service for this application pattern.`,
-      actionLabel: 'Review fit details',
+      actionLabel: 'Open service fit rationale',
       actionType: 'navigate',
       actionHref: `/app/${application.id}/catalog/${notRecommendedService.id}`,
       confidence: 0.88,
@@ -205,7 +236,7 @@ export const buildApplicationInsights = ({
     });
   }
 
-  const recommendedService = presentCatalogServices.find((service) => service.fit.signal === 'recommended');
+  const recommendedService = catalogServices.find((service) => service.fit.signal === 'recommended');
   const isOverProvisioned = Boolean(metrics && metrics.failedRequests < 20 && Number.parseFloat(metrics.errorRate) < 1);
   if (recommendedService && isOverProvisioned) {
     insights.push({
@@ -214,7 +245,7 @@ export const buildApplicationInsights = ({
       severity: 'medium',
       title: 'Current baseline suggests over-provisioned spend',
       description: `Low failure volume and low error rate indicate room to optimize ${recommendedService.name} capacity.`,
-      why: `Operational pattern shows ${metrics?.failedRequests ?? 0} failed requests and ${metrics?.errorRate ?? '0%'} error rate.`,
+      why: `Based on operational trend: ${metrics?.failedRequests ?? 0} failed requests and ${metrics?.errorRate ?? '0%'} error rate.`,
       recommendation: 'Model a smaller capacity profile and compare cost estimate before applying changes.',
       actionLabel: 'Open sizing recommendation',
       actionType: 'modal',

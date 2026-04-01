@@ -193,7 +193,7 @@ export function ApplicationWorkspaceClient({
   const handleInsightAction = (insight: ApplicationInsight) => {
     if (insight.actionType === 'suggest') {
       setActiveTab('Services');
-      setActionFeedback('Highlighted dependency health signals in Services.');
+      setActionFeedback('Opened Services so you can review affected dependencies.');
       return;
     }
 

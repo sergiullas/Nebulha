@@ -58,6 +58,9 @@ export function ApplicationInsights({ insights, onAction }: ApplicationInsightsP
   return (
     <section className="application-insights" aria-label="Application insights">
       <p className="application-insights-kicker">Application insights</p>
+      <p className="application-insights-supporting">
+        AI-generated recommendations based on your application context and governance policies.
+      </p>
       <div className="application-insights-list">
         {insights.map((insight) => (
           <ApplicationInsightItem key={insight.id} insight={insight} onAction={onAction} />
