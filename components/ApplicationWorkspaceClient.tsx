@@ -26,7 +26,7 @@ const tabs: WorkspaceTab[] = ['Overview', 'Logs & metrics', 'Deployments', 'Serv
 const getContextualPrompts = (
   isIncident: boolean,
   didRunRollback: boolean,
-  appName: string,
+  _appName: string,
 ): string[] => {
   if (didRunRollback) {
     return [
