@@ -21,8 +21,34 @@ type InlineAction = {
   secondary?: string;
 };
 
-const INCIDENT_PROMPTS = ['What changed?', 'What is likely broken?', 'What should I do next?'] as const;
 const tabs: WorkspaceTab[] = ['Overview', 'Logs & metrics', 'Deployments', 'Services'];
+
+const getContextualPrompts = (
+  isIncident: boolean,
+  didRunRollback: boolean,
+): string[] => {
+  if (didRunRollback) {
+    return [
+      'Is the rollback working?',
+      'What should I monitor now?',
+      'When can I close this incident?',
+    ];
+  }
+
+  if (isIncident) {
+    return [
+      'What changed?',
+      'What is likely broken?',
+      'What should I do next?',
+    ];
+  }
+
+  return [
+    'How is this app performing?',
+    'Any optimization opportunities?',
+    'What changed in the last deployment?',
+  ];
+};
 
 const toTitleCase = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -79,6 +105,42 @@ const createAiResponse = (
         });
   }
 
+  if (normalizedQuery === 'how is this app performing?') {
+    return aiReply(
+      `${application.name} in ${environment} is healthy. Error rate is within normal thresholds and no incidents are active. Last deployment ${application.lastDeployment} is stable.`,
+    );
+  }
+
+  if (normalizedQuery === 'any optimization opportunities?') {
+    return aiReply(
+      `No critical optimizations flagged at this time. Review the Application insights section on the Overview tab for proactive signals.`,
+    );
+  }
+
+  if (normalizedQuery === 'what changed in the last deployment?') {
+    return aiReply(
+      `Last deployment was ${deploymentVersion}, ${application.lastDeployment}. No anomalies were detected at the time of deployment.`,
+    );
+  }
+
+  if (normalizedQuery === 'is the rollback working?') {
+    return aiReply(
+      `${application.name} is recovering. Error rate has dropped since rollback. Continue monitoring for the next 15 minutes before closing the incident.`,
+    );
+  }
+
+  if (normalizedQuery === 'what should i monitor now?') {
+    return aiReply(
+      `Focus on error rate and latency P95. Both should continue trending down. If error rate does not reach normal thresholds within 15 minutes, escalate.`,
+    );
+  }
+
+  if (normalizedQuery === 'when can i close this incident?') {
+    return aiReply(
+      `Close the incident once error rate returns to below 1% and latency P95 returns to below 300ms for a sustained 10-minute window.`,
+    );
+  }
+
   return aiReply('I cannot answer that in this context. Try one of the suggested prompts.');
 };
 
@@ -123,11 +185,22 @@ export function ApplicationWorkspaceClient({
     return application.health;
   }, [application.health, didRunRollback, logsMetrics]);
 
+  const contextualPrompts = getContextualPrompts(
+    application.activeIncident,
+    didRunRollback,
+  );
+
   useEffect(() => {
     if (searchParams.get('openAi') === 'true') {
       setIsCompanionOpen(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (didRunRollback) {
+      setAiResponse(aiReply('Rollback is in progress. Use the prompts above to monitor recovery.'));
+    }
+  }, [didRunRollback]);
 
   const submitQuery = (query: string) => {
     setAiResponse(
@@ -322,15 +395,27 @@ export function ApplicationWorkspaceClient({
         )}
 
         {activeTab === 'Logs & metrics' && (
-          <section className="section-grid single-column">
-            <article className="section-card">
-              <h2 className="section-title">Recent Logs</h2>
-              {logsMetrics?.logs.map((log) => (
-                <p key={log} className="placeholder">
-                  {log}
-                </p>
+          <section className="logs-section">
+            <div className="logs-header">
+              <h2 className="section-title">Recent logs</h2>
+              <span className="logs-count">{logsMetrics?.logs.length ?? 0} entries</span>
+            </div>
+            <div className="log-list" role="log" aria-label="Application logs" aria-live="polite">
+              {logsMetrics?.logs.map((entry, index) => (
+                <div key={index} className={`log-entry log-entry--${entry.level.toLowerCase()}`}>
+                  <span className="log-level">{entry.level}</span>
+                  <span className="log-timestamp">
+                    {new Date(entry.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}
+                  </span>
+                  <span className="log-source">{entry.source}</span>
+                  <span className="log-message">{entry.message}</span>
+                </div>
               ))}
-            </article>
+            </div>
           </section>
         )}
 
@@ -403,7 +488,7 @@ export function ApplicationWorkspaceClient({
           </div>
 
           <div className="ai-prompt-list" aria-label="Suggested prompts">
-            {INCIDENT_PROMPTS.map((query) => (
+            {contextualPrompts.map((query) => (
               <button key={query} type="button" className="ai-prompt-button" onClick={() => submitQuery(query)}>
                 {query}
               </button>

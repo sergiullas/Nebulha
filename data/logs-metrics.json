@@ -8,9 +8,24 @@
       "deploymentVersion": "v1.24"
     },
     "logs": [
-      "[ERROR] Database connection timeout exceeded",
-      "[WARN] Retry threshold reached for payment request",
-      "[ERROR] Lambda execution exceeded configured timeout"
+      {
+        "level": "ERROR",
+        "message": "Database connection timeout exceeded",
+        "timestamp": "2024-01-15T14:32:11Z",
+        "source": "payments-db"
+      },
+      {
+        "level": "WARN",
+        "message": "Retry threshold reached for payment request",
+        "timestamp": "2024-01-15T14:31:58Z",
+        "source": "payments-api"
+      },
+      {
+        "level": "ERROR",
+        "message": "Lambda execution exceeded configured timeout",
+        "timestamp": "2024-01-15T14:31:44Z",
+        "source": "lambda-handler"
+      }
     ],
     "aiInsights": {
       "summary": "Production instability started shortly after deployment v1.24.",
@@ -76,9 +91,24 @@
       "deploymentVersion": "v3.8"
     },
     "logs": [
-      "[INFO] Batch forecast job completed successfully",
-      "[INFO] Model drift check within expected threshold",
-      "[INFO] No retry events detected in the last hour"
+      {
+        "level": "INFO",
+        "message": "Batch forecast job completed successfully",
+        "timestamp": "2024-01-15T13:45:00Z",
+        "source": "forecast-job"
+      },
+      {
+        "level": "INFO",
+        "message": "Model drift check within expected threshold",
+        "timestamp": "2024-01-15T13:44:52Z",
+        "source": "drift-monitor"
+      },
+      {
+        "level": "INFO",
+        "message": "No retry events detected in the last hour",
+        "timestamp": "2024-01-15T13:44:40Z",
+        "source": "retry-tracker"
+      }
     ],
     "aiInsights": {
       "summary": "Operational baseline remains stable in production.",

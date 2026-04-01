@@ -10,6 +10,7 @@ import {
   FitSignal,
   GovernanceStatus,
   HealthStatus,
+  LogEntry,
   Provider,
   RollbackSimulation,
   ServiceDependency,
@@ -93,6 +94,17 @@ const isCloudApplication = (value: unknown): value is CloudApplication => {
   );
 };
 
+const isLogEntry = (value: unknown): value is LogEntry => {
+  if (!isObject(value)) return false;
+  return (
+    typeof value.level === 'string' &&
+    ['ERROR', 'WARN', 'INFO'].includes(value.level) &&
+    typeof value.message === 'string' &&
+    typeof value.timestamp === 'string' &&
+    typeof value.source === 'string'
+  );
+};
+
 const isLogsMetricsRecord = (value: unknown): value is AppLogsMetrics => {
   if (!isObject(value) || !isMetricsRecord(value.metrics) || !isObject(value.aiInsights)) {
     return false;
@@ -100,7 +112,8 @@ const isLogsMetricsRecord = (value: unknown): value is AppLogsMetrics => {
 
   return (
     typeof value.appId === 'string' &&
-    isStringArray(value.logs) &&
+    Array.isArray(value.logs) &&
+    value.logs.every(isLogEntry) &&
     Array.isArray(value.dependencies) &&
     value.dependencies.every(isDependencyRecord) &&
     typeof value.aiInsights.summary === 'string' &&
