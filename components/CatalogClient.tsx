@@ -51,9 +51,7 @@ export function CatalogClient({ application, services, currentEnvironment }: Cat
           </p>
         </div>
         <div className="pill-row">
-          <span className="pill provider-aws" style={application.provider === 'GCP' ? { background: '#e8eef9', color: '#355388' } : {}}>
-            {application.provider}
-          </span>
+          <ProviderBadge provider={application.provider} />
           <span className="pill env-pill">{currentEnvironment}</span>
         </div>
       </header>
