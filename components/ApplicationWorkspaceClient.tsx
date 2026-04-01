@@ -2,8 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ProviderBadge } from '@/components/ProviderBadge';
-import { HealthBadge } from '@/components/HealthBadge';
+import { Badge, BadgeVariant } from '@/components/Badge';
 import { buildSharedActions } from '@/components/actions';
 import { ActionStatus, AppLogsMetrics, CloudApplication, DependencyHealthStatus, HealthStatus } from '@/components/types';
 
@@ -25,11 +24,11 @@ const tabs: WorkspaceTab[] = ['Overview', 'Logs & metrics', 'Deployments', 'Serv
 
 const toTitleCase = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-const dependencyClass: Record<DependencyHealthStatus, string> = {
-  Healthy: 'dep-healthy',
-  Degraded: 'dep-degraded',
-  Critical: 'dep-critical',
-  Unknown: 'dep-unknown',
+const dependencyClass: Record<DependencyHealthStatus, BadgeVariant> = {
+  Healthy: 'healthy',
+  Degraded: 'degraded',
+  Critical: 'critical',
+  Unknown: 'unknown',
 };
 
 const aiReply = (message: string, action?: InlineAction) => ({ message, action });
@@ -184,6 +183,8 @@ export function ApplicationWorkspaceClient({
   };
 
   const sharedActions = useMemo(() => buildSharedActions(application), [application]);
+  const providerVariant = application.provider === 'AWS' ? 'aws' : application.provider === 'GCP' ? 'gcp' : 'unknown';
+  const healthVariant = activeHealth === 'healthy' ? 'healthy' : activeHealth === 'critical' ? 'critical' : 'degraded';
 
   return (
     <section className={`workspace-layout ${isCompanionOpen ? 'drawer-open' : 'drawer-closed'}`}>
@@ -195,9 +196,9 @@ export function ApplicationWorkspaceClient({
             </p>
             <h1 className="workspace-title">{application.name}</h1>
             <div className="pill-row">
-              <ProviderBadge provider={application.provider} />
-              <span className="pill env-pill">{currentEnvironment}</span>
-              <HealthBadge health={activeHealth} />
+              <Badge variant={providerVariant}>{application.provider}</Badge>
+              <Badge variant="env">{currentEnvironment}</Badge>
+              <Badge variant={healthVariant}>{activeHealth === 'warning' ? 'Degraded' : toTitleCase(activeHealth)}</Badge>
             </div>
           </div>
           <p className="workspace-user">Signed in as Devin</p>
@@ -242,7 +243,14 @@ export function ApplicationWorkspaceClient({
               className={`tab-pill ${activeTab === tab ? 'active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'Services' && unhealthyDependencies.length > 0 ? `${tab} (${unhealthyDependencies.length})` : tab}
+              {tab === 'Services' && unhealthyDependencies.length > 0 ? (
+                <>
+                  {tab}
+                  <span className="tab__badge">{unhealthyDependencies.length}</span>
+                </>
+              ) : (
+                tab
+              )}
             </button>
           ))}
         </nav>
@@ -251,12 +259,12 @@ export function ApplicationWorkspaceClient({
           <section className="metrics-grid">
             <article className="metric-card">
               <p className="metric-label">ERROR RATE</p>
-              <p className="metric-value">{activeMetrics.errorRate}</p>
+              <p className={`metric-value ${activeHealth === 'critical' ? 'metric-critical' : ''}`}>{activeMetrics.errorRate}</p>
               <p className="metric-subtext">{activeHealth === 'critical' ? 'Critical' : 'Normal'}</p>
             </article>
             <article className="metric-card">
               <p className="metric-label">LATENCY P95</p>
-              <p className="metric-value">{activeMetrics.latencyP95}</p>
+              <p className={`metric-value ${activeHealth === 'critical' ? 'metric-critical' : ''}`}>{activeMetrics.latencyP95}</p>
               <p className="metric-subtext">{activeHealth === 'critical' ? 'Elevated' : 'Normal'}</p>
             </article>
             <article className="metric-card">
@@ -342,13 +350,16 @@ export function ApplicationWorkspaceClient({
               <div className="dependency-list">
                 {dependencies.map((dependency) => (
                   <article key={dependency.name} className="dependency-row">
-                    <div>
-                      <p className="dependency-name">{dependency.name}</p>
-                      <p className="dependency-meta">{dependency.metadata}</p>
+                    <span className={`dependency-row__dot dependency-row__dot--${dependencyClass[dependency.health]}`} />
+                    <div className="dependency-main">
+                      <p className="dependency-row__name">{dependency.name}</p>
+                      <p className="dependency-row__detail">{dependency.metadata}</p>
                     </div>
-                    <div className="pill-row">
-                      <ProviderBadge provider={dependency.provider} />
-                      <span className={`pill ${dependencyClass[dependency.health]}`}>{dependency.health}</span>
+                    <div className="dependency-row__badges">
+                      <Badge variant={dependency.provider === 'AWS' ? 'aws' : dependency.provider === 'GCP' ? 'gcp' : 'unknown'}>
+                        {dependency.provider}
+                      </Badge>
+                      <Badge variant={dependencyClass[dependency.health]}>{dependency.health}</Badge>
                     </div>
                   </article>
                 ))}
@@ -383,10 +394,15 @@ export function ApplicationWorkspaceClient({
         </button>
 
         <div id="ai-drawer-content" className="ai-drawer-content">
-          <h3 className="ai-drawer-title">AI Assistant</h3>
-          <p className="ai-context-line">
-            {application.name} · {toTitleCase(currentEnvironment)} · {application.provider}
-          </p>
+          <div className="ai-drawer-head">
+            <div>
+              <h3 className="ai-drawer-title">AI companion</h3>
+              <p className="ai-context-line">Scoped to {application.name}</p>
+            </div>
+            <button type="button" className="ai-close-button" onClick={() => setIsCompanionOpen(false)} aria-label="Close AI companion">
+              ✕
+            </button>
+          </div>
 
           <div className="ai-prompt-list" aria-label="Suggested prompts">
             {INCIDENT_PROMPTS.map((query) => (
