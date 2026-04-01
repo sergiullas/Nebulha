@@ -26,7 +26,6 @@ const tabs: WorkspaceTab[] = ['Overview', 'Logs & metrics', 'Deployments', 'Serv
 const getContextualPrompts = (
   isIncident: boolean,
   didRunRollback: boolean,
-  _appName: string,
 ): string[] => {
   if (didRunRollback) {
     return [
@@ -189,7 +188,6 @@ export function ApplicationWorkspaceClient({
   const contextualPrompts = getContextualPrompts(
     application.activeIncident,
     didRunRollback,
-    application.name,
   );
 
   useEffect(() => {
