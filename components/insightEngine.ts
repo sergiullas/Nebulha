@@ -205,7 +205,7 @@ export const buildApplicationInsights = ({
     });
   }
 
-  const recommendedService = catalogServices.find((service) => service.fit.signal === 'recommended');
+  const recommendedService = presentCatalogServices.find((service) => service.fit.signal === 'recommended');
   const isOverProvisioned = Boolean(metrics && metrics.failedRequests < 20 && Number.parseFloat(metrics.errorRate) < 1);
   if (recommendedService && isOverProvisioned) {
     insights.push({
