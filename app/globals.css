@@ -399,7 +399,7 @@ a {
   letter-spacing: var(--tracking-wider);
 }
 
-.section-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: var(--space-3); padding: var(--space-3) var(--space-5) var(--space-6); }
+.section-grid { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: var(--space-3); padding: var(--space-3) var(--space-5) var(--space-6); }
 .single-column { grid-template-columns: 1fr; }
 .section-card { background: var(--bg-secondary); border: var(--border-width) solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-3); }
 .section-title { margin: 0 0 var(--space-2); font-size: var(--text-md); font-weight: var(--weight-medium); }
