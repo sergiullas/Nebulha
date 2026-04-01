@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Badge, BadgeVariant } from '@/components/Badge';
 import { ActionStatus, AppLogsMetrics, CloudApplication, DependencyHealthStatus, HealthStatus } from '@/components/types';
+import { ApplicationInsight, ApplicationInsights } from '@/components/ApplicationInsights';
 
 type ApplicationWorkspaceClientProps = {
   application: CloudApplication;
@@ -93,7 +94,6 @@ export function ApplicationWorkspaceClient({
   const [didRunRollback, setDidRunRollback] = useState(false);
   const [actionFeedback, setActionFeedback] = useState('');
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('Overview');
-  const [servicesView, setServicesView] = useState<'list' | 'graph'>('list');
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [auditTrail, setAuditTrail] = useState<string[]>([]);
 
@@ -182,6 +182,79 @@ export function ApplicationWorkspaceClient({
     setPendingAction(null);
   };
 
+
+  const applicationInsights = useMemo<ApplicationInsight[]>(() => {
+    if (application.id !== 'payments-api') {
+      return [];
+    }
+
+    const rankedInsights: ApplicationInsight[] = [];
+    const hasTransactionalDatabase = dependencies.some((dependency) =>
+      /RDS|PostgreSQL/i.test(`${dependency.name} ${dependency.metadata}`),
+    );
+
+    const showsDiscouragedPattern = application.provider === 'AWS' && hasTransactionalDatabase;
+    if (showsDiscouragedPattern) {
+      rankedInsights.push({
+        id: 'governance-exception-review',
+        title: 'Selected service requires exception review',
+        description:
+          'Redshift is currently selected in this app context, but it does not meet approved usage criteria for transactional workloads.',
+        actionLabel: 'Review approved alternative',
+        actionType: 'navigate',
+        actionHref: `/app/${application.id}/catalog/redshift`,
+        severity: 'high',
+      });
+    }
+
+    if (hasTransactionalDatabase) {
+      rankedInsights.push({
+        id: 'reliability-multi-az',
+        title: 'Production database is not configured for high availability',
+        description: 'A single-zone failure could interrupt payment processing for checkout and settlement traffic.',
+        actionLabel: 'Enable multi-AZ',
+        actionType: 'mock',
+        severity: 'high',
+      });
+
+      rankedInsights.push({
+        id: 'architecture-fit-redshift',
+        title: 'Redshift is not suited for this workload',
+        description: 'Payments API depends on transactional consistency and relational query patterns.',
+        actionLabel: 'Review RDS alternative',
+        actionType: 'navigate',
+        actionHref: `/app/${application.id}/catalog/amazon-rds`,
+        severity: 'medium',
+      });
+
+      rankedInsights.push({
+        id: 'cost-rds-overprovisioned',
+        title: 'RDS instance is over-provisioned',
+        description: 'Current usage trends suggest you are paying for more capacity than this application requires.',
+        actionLabel: 'Resize instance',
+        actionType: 'scroll',
+        severity: 'medium',
+      });
+    }
+
+    return rankedInsights.slice(0, 3);
+  }, [application.id, application.provider, dependencies]);
+
+  const handleInsightAction = (insight: ApplicationInsight) => {
+    if (insight.id === 'reliability-multi-az') {
+      setActionFeedback('Opened high-availability recommendation. Multi-AZ can be enabled from service configuration.');
+      return;
+    }
+
+    if (insight.id === 'cost-rds-overprovisioned') {
+      setActiveTab('Services');
+      setActionFeedback('Jumped to Services so you can review dependency sizing.');
+      return;
+    }
+
+    setActionFeedback(`${insight.actionLabel} opened for ${insight.title}.`);
+  };
+
   const providerVariant = application.provider === 'AWS' ? 'aws' : application.provider === 'GCP' ? 'gcp' : 'unknown';
   const healthVariant = activeHealth === 'healthy' ? 'healthy' : activeHealth === 'critical' ? 'critical' : 'degraded';
 
@@ -200,7 +273,6 @@ export function ApplicationWorkspaceClient({
               <Badge variant={healthVariant}>{activeHealth === 'warning' ? 'Degraded' : toTitleCase(activeHealth)}</Badge>
             </div>
           </div>
-          <p className="workspace-user">Signed in as Devin</p>
         </header>
 
         {application.activeIncident ? (
@@ -282,6 +354,7 @@ export function ApplicationWorkspaceClient({
         {activeTab === 'Overview' && (
           <>
             <p className="overview-title">APPLICATION OVERVIEW</p>
+            <ApplicationInsights insights={applicationInsights} onAction={handleInsightAction} />
             <section className="section-grid">
               <article className="section-card">
                 <h2 className="section-title">Environments</h2>
@@ -331,24 +404,9 @@ export function ApplicationWorkspaceClient({
                 >
                   + Add service
                 </Link>
-                <button
-                  type="button"
-                  className={`incident-button secondary ${servicesView === 'list' ? 'toggle-active' : ''}`}
-                  onClick={() => setServicesView('list')}
-                >
-                  List
-                </button>
-                <button
-                  type="button"
-                  className={`incident-button secondary ${servicesView === 'graph' ? 'toggle-active' : ''}`}
-                  onClick={() => setServicesView('graph')}
-                >
-                  Graph
-                </button>
               </div>
             </div>
-            {servicesView === 'list' ? (
-              <div className="dependency-list">
+            <div className="dependency-list">
                 {dependencies.map((dependency) => (
                   <article key={dependency.name} className="dependency-row">
                     <span className={`dependency-row__dot dependency-row__dot--${dependencyClass[dependency.health]}`} />
@@ -365,17 +423,6 @@ export function ApplicationWorkspaceClient({
                   </article>
                 ))}
               </div>
-            ) : (
-              <div className="graph-panel" aria-label="Service dependency graph">
-                <div className="graph-node center-node">{application.name}</div>
-                {dependencies.map((dependency) => (
-                  <div key={dependency.name} className={`graph-node ${dependency.externalCaller ? 'dashed' : ''}`}>
-                    <span>{dependency.name}</span>
-                    <span className={`graph-edge ${dependencyClass[dependency.health]}`} />
-                  </div>
-                ))}
-              </div>
-            )}
           </section>
         )}
 
