@@ -186,7 +186,7 @@ export function ApplicationWorkspaceClient({
   const healthVariant = activeHealth === 'healthy' ? 'healthy' : activeHealth === 'critical' ? 'critical' : 'degraded';
 
   return (
-    <section className={`workspace-layout ${isCompanionOpen ? 'drawer-open' : 'drawer-closed'}`}>
+    <section className={`workspace workspace-layout ${isCompanionOpen ? 'drawer-open' : 'drawer-closed'}`}>
       <div className="workspace-frame">
         <header className="workspace-head">
           <div>

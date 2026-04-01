@@ -39,7 +39,7 @@ export function CatalogClient({ application, services, currentEnvironment }: Cat
   const filtered = activeCategory === ALL_CATEGORY ? services : services.filter((s) => s.category === activeCategory);
 
   return (
-    <div className="catalog-page">
+    <div className="catalog catalog-page">
       <header className="catalog-header">
         <div className="catalog-header-left">
           <Link href={`/app/${application.id}`} className="catalog-back-link">

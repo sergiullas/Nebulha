@@ -78,7 +78,7 @@ export function ServiceDetailClient({ application, service, alternative, current
   };
 
   return (
-    <div className="detail-page">
+    <div className="detail-pane detail-page">
       <div className="detail-nav-bar">
         <Link href={`/app/${application.id}/catalog`} className="catalog-back-link">
           ← Services for {application.name}
