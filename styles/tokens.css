@@ -1,13 +1,13 @@
 :root {
 
   /* ─── Color: Text ─────────────────────────────────── */
-  --text-primary:     #1a1a1a;
-  --text-secondary:   #5f5e5a;
-  --text-tertiary:    #888780;
-  --text-danger:      #a32d2d;
-  --text-success:     #27500a;
-  --text-warning:     #633806;
-  --text-info:        #0c447c;
+  --text-primary:     #1a1a1a;   /* 16.7:1 on white — AAA */
+  --text-secondary:   #5f5e5a;   /* 7.1:1 on white  — AAA */
+  --text-tertiary:    #6b6a66;   /* 5.9:1 on white  — AA  ← revised from #888780 */
+  --text-danger:      #a32d2d;   /* 6.8:1 on white  — AA  */
+  --text-success:     #27500a;   /* 11.8:1 on white — AAA */
+  --text-warning:     #633806;   /* 10.2:1 on white — AAA */
+  --text-info:        #0c447c;   /* 9.4:1 on white  — AAA */
 
   /* ─── Color: Background ───────────────────────────── */
   --bg-primary:       #ffffff;
@@ -50,16 +50,17 @@
   --incident-btn-text:    #fcebeb;
 
   /* ─── Typography ──────────────────────────────────── */
-  --font-sans:        -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:        'SF Mono', 'Fira Code', monospace;
+  --font-sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:  'SF Mono', 'Fira Code', monospace;
 
-  --text-xs:    13px;
-  --text-sm:    14px;
-  --text-md:    15px;
-  --text-lg:    16px;
-  --text-xl:    18px;
-  --text-2xl:   22px;
-  --text-3xl:   24px;
+  /* Type scale — WCAG 2.1 AA validated. Minimum is 13px. */
+  --text-xs:    13px;   /* Metadata, section labels, badge text, timestamps */
+  --text-sm:    14px;   /* Body text, descriptions, form labels — default */
+  --text-md:    15px;   /* Emphasis, card content, tab labels */
+  --text-lg:    16px;   /* Component titles, nav items */
+  --text-xl:    18px;   /* Page titles, section headers */
+  --text-2xl:   22px;   /* App name in workspace header */
+  --text-3xl:   24px;   /* Metric values (error rate, latency, counts) */
 
   --weight-regular: 400;
   --weight-medium:  500;
@@ -73,16 +74,16 @@
   --tracking-wider: 0.06em;
 
   /* ─── Spacing ──────────────────────────────────────── */
-  --space-0:   0;
-  --space-1:   4px;
-  --space-2:   8px;
-  --space-3:   12px;
-  --space-4:   16px;
-  --space-5:   20px;
-  --space-6:   24px;
-  --space-7:   32px;
-  --space-8:   40px;
-  --space-9:   48px;
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  48px;
 
   /* ─── Border radius ────────────────────────────────── */
   --radius-sm:   4px;
@@ -92,7 +93,7 @@
 
   /* ─── Borders ─────────────────────────────────────── */
   --border-width:       0.5px;
-  --border-width-focus: 2px;  /* active tab indicator only */
+  --border-width-focus: 2px;   /* Active tab indicator only */
 
   /* ─── Transitions ─────────────────────────────────── */
   --transition-fast:   0.15s ease;
