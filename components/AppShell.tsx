@@ -22,6 +22,24 @@ const navItems = [
   { href: '/catalog', label: 'Catalog' },
 ];
 
+type SidebarAccountPanelProps = {
+  name: string;
+  role?: string;
+};
+
+function SidebarAccountPanel({ name, role }: SidebarAccountPanelProps) {
+  return (
+    <button type="button" className="sidebar-account-panel" aria-label={`Signed-in account: ${name}`}>
+      <span className="sidebar-account-avatar" aria-hidden="true">{name.charAt(0)}</span>
+      <span className="sidebar-account-meta">
+        <span className="sidebar-account-name">{name}</span>
+        {role ? <span className="sidebar-account-role">{role}</span> : null}
+      </span>
+      <span className="sidebar-account-caret" aria-hidden="true">▾</span>
+    </button>
+  );
+}
+
 export function AppShell({ children, currentPath }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -153,14 +171,18 @@ export function AppShell({ children, currentPath }: AppShellProps) {
   return (
     <div className="portal-shell">
       <aside className="sidebar">
-        <div className="brand">Cloud Brokerage Portal</div>
-        <nav className="nav-list" aria-label="Primary navigation">
-          {navItems.map((item) => (
-            <Link className={`nav-link ${activePath === item.href ? 'active' : ''}`} key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div>
+          <div className="brand">Cloud Brokerage Portal</div>
+          <nav className="nav-list" aria-label="Primary navigation">
+            {navItems.map((item) => (
+              <Link className={`nav-link ${activePath === item.href ? 'active' : ''}`} key={item.href} href={item.href}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        <SidebarAccountPanel name="Devin" role="Application Engineer" />
       </aside>
 
       <div className="screen-shell">
