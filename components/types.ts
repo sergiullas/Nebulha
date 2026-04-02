@@ -46,10 +46,19 @@ export type RollbackSimulation = {
   aiConfirmation: string;
 };
 
+export type LogLevel = 'ERROR' | 'WARN' | 'INFO';
+
+export type LogEntry = {
+  level: LogLevel;
+  message: string;
+  timestamp: string;
+  source: string;
+};
+
 export type AppLogsMetrics = {
   appId: string;
   metrics: AppMetrics;
-  logs: string[];
+  logs: LogEntry[];
   aiInsights: AppAiInsights;
   rollbackSimulation?: RollbackSimulation;
   dependencies: ServiceDependency[];
