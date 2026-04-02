@@ -1,10 +1,12 @@
 import rawApps from '@/data/apps.json';
 import rawLogsMetrics from '@/data/logs-metrics.json';
 import rawCatalogServices from '@/data/catalog-services.json';
+import rawTemplates from '@/data/templates.json';
 import {
   AppLogsMetrics,
   CatalogService,
   CloudApplication,
+  CloudTemplate,
   CostTier,
   DependencyHealthStatus,
   FitSignal,
@@ -14,6 +16,9 @@ import {
   Provider,
   RollbackSimulation,
   ServiceDependency,
+  TemplateComplexity,
+  TemplateGovernanceState,
+  TemplateWorkloadType,
 } from './types';
 
 const providers: Provider[] = ['AWS', 'GCP', 'Internal'];
@@ -205,3 +210,111 @@ export const getCatalogServicesByProvider = (provider: string): CatalogService[]
 
 export const getCatalogServiceById = (provider: string, serviceId: string): CatalogService | undefined =>
   getCatalogServicesByProvider(provider).find((s) => s.id === serviceId);
+
+// ── Templates ──────────────────────────────────────────────
+
+const templateWorkloadTypes: TemplateWorkloadType[] = ['web-api', 'data-pipeline', 'event-driven', 'ml-inference', 'static-site'];
+const templateComplexities: TemplateComplexity[] = ['low', 'medium', 'high'];
+const templateGovernanceStates: TemplateGovernanceState[] = ['approved', 'requires-approval', 'includes-restricted'];
+
+const isTemplateWorkloadType = (v: unknown): v is TemplateWorkloadType =>
+  typeof v === 'string' && templateWorkloadTypes.includes(v as TemplateWorkloadType);
+
+const isTemplateComplexity = (v: unknown): v is TemplateComplexity =>
+  typeof v === 'string' && templateComplexities.includes(v as TemplateComplexity);
+
+const isTemplateGovernanceState = (v: unknown): v is TemplateGovernanceState =>
+  typeof v === 'string' && templateGovernanceStates.includes(v as TemplateGovernanceState);
+
+const isTemplateServiceEntry = (v: unknown): boolean => {
+  if (!isObject(v)) return false;
+  return (
+    typeof v.serviceId === 'string' &&
+    typeof v.name === 'string' &&
+    typeof v.role === 'string' &&
+    typeof v.required === 'boolean' &&
+    isProvider(v.provider) &&
+    isGovernanceStatus(v.governance) &&
+    typeof v.category === 'string'
+  );
+};
+
+const isTemplateParameter = (v: unknown): boolean => {
+  if (!isObject(v)) return false;
+  return (
+    typeof v.id === 'string' &&
+    typeof v.label === 'string' &&
+    isStringArray(v.options) &&
+    typeof v.default === 'string' &&
+    typeof v.editable === 'boolean' &&
+    (v.lockedReason === undefined || typeof v.lockedReason === 'string')
+  );
+};
+
+const isTemplateAIInsight = (v: unknown): boolean => {
+  if (!isObject(v)) return false;
+  return (
+    typeof v.fit === 'string' &&
+    typeof v.cost === 'string' &&
+    typeof v.risk === 'string' &&
+    typeof v.confidence === 'number' &&
+    isStringArray(v.evidence)
+  );
+};
+
+const isTemplateExecutionPreview = (v: unknown): boolean => {
+  if (!isObject(v)) return false;
+  return (
+    isStringArray(v.resourcesCreated) &&
+    isStringArray(v.actionsPerformed) &&
+    isStringArray(v.integrationsTriggered)
+  );
+};
+
+const isTemplateEstimatedCost = (v: unknown): boolean => {
+  if (!isObject(v)) return false;
+  return typeof v.min === 'number' && typeof v.max === 'number';
+};
+
+const isCloudTemplate = (v: unknown): v is CloudTemplate => {
+  if (!isObject(v)) return false;
+  return (
+    typeof v.id === 'string' &&
+    typeof v.name === 'string' &&
+    isTemplateWorkloadType(v.type) &&
+    typeof v.owner === 'string' &&
+    typeof v.version === 'string' &&
+    typeof v.lastUpdated === 'string' &&
+    typeof v.purpose === 'string' &&
+    isStringArray(v.recommendedFor) &&
+    isStringArray(v.notRecommendedFor) &&
+    Array.isArray(v.services) && v.services.every(isTemplateServiceEntry) &&
+    Array.isArray(v.parameters) && v.parameters.every(isTemplateParameter) &&
+    isTemplateGovernanceState(v.governanceState) &&
+    isStringArray(v.approvedComponents) &&
+    isStringArray(v.restrictedOptions) &&
+    isStringArray(v.requiresApprovalElements) &&
+    isStringArray(v.policySources) &&
+    isTemplateEstimatedCost(v.estimatedMonthlyCost) &&
+    isStringArray(v.costDrivers) &&
+    typeof v.scalingBehavior === 'string' &&
+    typeof v.rationale === 'string' &&
+    isStringArray(v.tradeoffs) &&
+    isStringArray(v.alternatives) &&
+    isTemplateAIInsight(v.aiInsight) &&
+    isTemplateExecutionPreview(v.executionPreview) &&
+    isProvider(v.provider) &&
+    isTemplateComplexity(v.complexity) &&
+    isStringArray(v.tags)
+  );
+};
+
+const parseTemplates = (data: unknown): CloudTemplate[] => {
+  if (!Array.isArray(data)) return [];
+  return data.filter(isCloudTemplate);
+};
+
+export const mockTemplates = parseTemplates(rawTemplates);
+
+export const getTemplateById = (id: string): CloudTemplate | undefined =>
+  mockTemplates.find((t) => t.id === id);

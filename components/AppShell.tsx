@@ -20,6 +20,7 @@ type PendingAction = {
 const navItems = [
   { href: '/', label: 'My Applications' },
   { href: '/catalog', label: 'Catalog' },
+  { href: '/templates', label: 'Templates' },
 ];
 
 type SidebarAccountPanelProps = {
