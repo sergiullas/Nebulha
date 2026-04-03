@@ -52,17 +52,36 @@ const summarizeIncluded = (template: CloudTemplate) => {
 };
 
 const summarizeConstraints = (template: CloudTemplate) => {
-  const lockedCount = template.parameters.filter((param) => !param.editable).length;
-  if (lockedCount === 0) {
-    return 'Constraints: Configurable within policy limits';
+  const editableParams = template.parameters.filter((param) => param.editable);
+  const lockedParams = template.parameters.filter((param) => !param.editable);
+
+  const compactName = (value: string) =>
+    value
+      .replace(/_/g, ' ')
+      .replace(/\s+(instance|node|dataset|class|type)$/i, '')
+      .trim()
+      .toLowerCase();
+
+  const editableSummary = editableParams
+    .slice(0, 2)
+    .map((param) => compactName(param.label))
+    .join(' and ');
+
+  if (editableParams.length === 0) {
+    return 'Constraints: Configuration fixed by policy';
   }
 
-  if (lockedCount === 1) {
-    const lockedParam = template.parameters.find((param) => !param.editable);
-    return `Constraints: ${lockedParam?.label ?? '1 locked setting'} controlled by policy`;
+  if (lockedParams.length === 0) {
+    return `Constraints: ${editableSummary} configurable`;
   }
 
-  return `Constraints: ${lockedCount} settings are policy-locked`;
+  const lockedNames = lockedParams.map((param) => compactName(param.label));
+  const isRegionLocked = lockedNames.some((name) => name.includes('region') || name.includes('residency'));
+  if (isRegionLocked) {
+    return `Constraints: ${editableSummary} configurable; region restricted by policy`;
+  }
+
+  return `Constraints: ${editableSummary} configurable; some settings fixed by policy`;
 };
 
 function TemplateCard({ template }: { template: CloudTemplate }) {
@@ -82,8 +101,6 @@ function TemplateCard({ template }: { template: CloudTemplate }) {
           </div>
           <div className="template-card-meta-row">
             <span className="pill env-pill">{workloadLabels[template.type]}</span>
-            <span className="pill env-pill template-complexity-pill">{complexityLabel[template.complexity]}</span>
-            <span className="pill env-pill">{template.provider}</span>
           </div>
         </div>
 
@@ -95,7 +112,6 @@ function TemplateCard({ template }: { template: CloudTemplate }) {
         </div>
 
         <div className="template-card-services" style={{ marginTop: 12 }}>
-          <p className="template-card-services-label">Key signals</p>
           <p className="detail-impact-note">{summarizeIncluded(template)}</p>
           <p className="detail-impact-note">
             Cost: Est. ${template.estimatedMonthlyCost.min}–${template.estimatedMonthlyCost.max} / month
@@ -106,13 +122,7 @@ function TemplateCard({ template }: { template: CloudTemplate }) {
         <p className="template-card-purpose" style={{ marginTop: 12 }}>{rationale}</p>
 
         <div className="template-card-footer">
-          <div className="template-card-cost">
-            <span className="template-card-cost-label">AI confidence</span>
-            <span className="template-card-cost-value">{template.aiInsight.confidence}%</span>
-          </div>
-          <div className="template-card-ai-signal">
-            <span className="template-card-cta">Inspect template →</span>
-          </div>
+          <span className="template-card-cta">Inspect template</span>
         </div>
       </article>
     </Link>

@@ -54,7 +54,7 @@ const complexityLabel: Record<TemplateComplexity, string> = {
 };
 
 const STEP_LABELS: Record<FlowStep, string> = {
-  overview: 'Overview',
+  overview: 'Inspect',
   configure: 'Configure',
   review: 'Review',
   done: 'Done',
