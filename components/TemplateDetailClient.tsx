@@ -96,13 +96,13 @@ const groupLabelForParam = (paramId: string, label: string) => {
 
 const estimateConfiguredCost = (template: CloudTemplate, paramValues: Record<string, string>) => {
   let multiplier = 1;
-  const allValues = Object.values(paramValues).join(' ').toLowerCase();
+  const allValues = Object.values(paramValues).join(' ');
 
-  if (allValues.includes('large')) multiplier += 0.35;
-  if (allValues.includes('medium')) multiplier += 0.15;
-  if (allValues.includes('prod')) multiplier += 0.2;
-  if (allValues.includes('staging')) multiplier += 0.1;
-  if (allValues.includes('nearline')) multiplier -= 0.08;
+  if (/\blarge\b/i.test(allValues)) multiplier += 0.35;
+  if (/\bmedium\b/i.test(allValues)) multiplier += 0.15;
+  if (/\bprod\b/i.test(allValues)) multiplier += 0.2;
+  if (/\bstaging\b/i.test(allValues)) multiplier += 0.1;
+  if (/\bnearline\b/i.test(allValues)) multiplier -= 0.08;
 
   const min = Math.round(template.estimatedMonthlyCost.min * multiplier);
   const max = Math.round(template.estimatedMonthlyCost.max * multiplier);
