@@ -91,6 +91,7 @@ function TemplateCard({ template }: { template: CloudTemplate }) {
     template.governanceState,
     template.aiInsight.confidence,
     template.aiInsight.fit,
+    workloadLabels[template.type],
   );
   const purpose = toSentence(template.purpose);
   const rationale = toSentence(template.rationale);
@@ -171,7 +172,7 @@ export function TemplatesClient({ templates }: TemplatesClientProps) {
         <div className="templates-header-text">
           <h1 className="templates-title">Templates</h1>
           <p className="templates-subtitle">
-            Pre-approved architecture patterns for common workloads. Each template encodes platform best practices,
+            Pre-approved architecture patterns for common workloads. Each template encodes approved defaults,
             governance constraints, and cost guidance — so you start from a known, safe baseline.
           </p>
         </div>

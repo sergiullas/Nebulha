@@ -236,7 +236,7 @@
       "Memorystore instance size if cache is enabled"
     ],
     "scalingBehavior": "BigQuery and Cloud Storage scale automatically with data volume. Costs are query-driven — partitioning and clustering are strongly recommended to control scan costs.",
-    "rationale": "This template provides a best-practice GCP analytics stack. BigQuery's serverless query engine eliminates cluster management overhead. Cloud Storage provides a cost-effective landing zone. The optional Memorystore layer serves aggregated results to APIs without re-querying BigQuery on every request.",
+    "rationale": "This template provides a governed GCP analytics stack. BigQuery's serverless query engine eliminates cluster management overhead. Cloud Storage provides a cost-effective landing zone. The optional Memorystore layer serves aggregated results to APIs without re-querying BigQuery on every request.",
     "tradeoffs": [
       "BigQuery requires approval — provisioning timeline extends by 1–2 business days",
       "Query costs are variable and require FinOps monitoring and query optimization",
