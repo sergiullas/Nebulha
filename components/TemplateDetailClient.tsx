@@ -85,6 +85,13 @@ const constraintRulesByTemplate: Record<string, Record<string, ConstraintRule>> 
       exceptionPath: 'Request a governed exception through Cloud Platform review workflow.',
     },
   },
+  'high-performance-data-lakehouse': {
+    region: {
+      blockedValues: ['us-east1'],
+      explanation: 'us-east1 is not approved for Bigtable workloads under current ACME data residency controls.',
+      suggestedAlternative: 'us-central1',
+    },
+  },
 };
 
 const groupLabelForParam = (paramId: string, label: string) => {
