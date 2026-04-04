@@ -609,7 +609,7 @@
       "Event-Driven Microservice template — if the workload is write-heavy with schema flexibility"
     ],
     "aiInsight": {
-      "fit": "Ideal for internal services, admin tools, and early-stage APIs. Not recommended for customer-facing services with unpredictable traffic.",
+      "fit": "Well-suited for internal services, admin tools, and early-stage APIs with modest and predictable traffic. Not recommended for customer-facing services with unpredictable traffic.",
       "cost": "Lowest cost of all approved templates. Predictable and easy to forecast. FinOps Tier-1 policy applies.",
       "risk": "Very low risk. Single fully-approved service with no data residency restrictions. Primary operational risk is database connection exhaustion under unexpected traffic.",
       "confidence": 95,
