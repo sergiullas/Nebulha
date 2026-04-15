@@ -6,7 +6,11 @@
     "project": "Payments Revamp",
     "provider": "AWS",
     "environment": "prod",
-    "environments": ["dev", "staging", "prod"],
+    "environments": [
+      "dev",
+      "staging",
+      "prod"
+    ],
     "health": "critical",
     "lastDeployment": "18m ago",
     "activeIncident": true,
@@ -17,10 +21,13 @@
     "id": "forecast-engine",
     "name": "Forecast Engine",
     "organization": "ACME",
-    "project": "Analytics",
+    "project": "Payments Revamp",
     "provider": "GCP",
     "environment": "prod",
-    "environments": ["dev", "prod"],
+    "environments": [
+      "dev",
+      "prod"
+    ],
     "health": "healthy",
     "lastDeployment": "1d ago",
     "activeIncident": false,
