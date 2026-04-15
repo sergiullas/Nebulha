@@ -17,7 +17,7 @@ export default function ApplicationWorkspacePage({ params }: ApplicationWorkspac
   }
 
   const logsMetrics = getLogsMetricsByAppId(application.id);
-  const currentEnvironment = application.environments.includes('prod') ? 'prod' : application.environments[0];
+  const currentEnvironment = application.environment;
 
   return (
     <AppShell>

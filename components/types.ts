@@ -9,6 +9,7 @@ export type CloudApplication = {
   organization: string;
   project: string;
   provider: Provider;
+  environment: string;
   environments: string[];
   health: HealthStatus;
   lastDeployment: string;
@@ -33,7 +34,7 @@ export type AppMetrics = {
 };
 
 export type AppAiInsights = {
-  summary: string;
+  diagnosis: string;
   likelyCause: string;
   nextStep: string;
 };

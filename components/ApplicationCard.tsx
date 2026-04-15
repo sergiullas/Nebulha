@@ -18,13 +18,14 @@ export function ApplicationCard({ app }: ApplicationCardProps) {
       <h2 className="app-card__name">{app.name}</h2>
       <div className="app-card__badges">
         <Badge variant={providerVariant}>{app.provider}</Badge>
+        <Badge variant="env">{app.environment}</Badge>
         <Badge variant={healthVariant}>{app.health === 'warning' ? 'Degraded' : app.health === 'healthy' ? 'Healthy' : 'Critical'}</Badge>
         {app.activeIncident && <Badge variant="incident">Incident Active</Badge>}
       </div>
       <div className="app-card__deployment">Last deployment: {app.lastDeployment}</div>
       {app.activeIncident && app.aiSummary && (
         <p className="app-card__insight">
-          <span className="app-card__insight-prefix">AI:</span> {app.aiSummary}
+          <span className="app-card__insight-prefix">AI Insight:</span> {app.aiSummary}
         </p>
       )}
     </Link>

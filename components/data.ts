@@ -90,6 +90,7 @@ const isCloudApplication = (value: unknown): value is CloudApplication => {
     typeof value.organization === 'string' &&
     typeof value.project === 'string' &&
     isProvider(value.provider) &&
+    typeof value.environment === 'string' &&
     isStringArray(value.environments) &&
     isHealthStatus(value.health) &&
     typeof value.lastDeployment === 'string' &&
@@ -121,7 +122,7 @@ const isLogsMetricsRecord = (value: unknown): value is AppLogsMetrics => {
     value.logs.every(isLogEntry) &&
     Array.isArray(value.dependencies) &&
     value.dependencies.every(isDependencyRecord) &&
-    typeof value.aiInsights.summary === 'string' &&
+    typeof value.aiInsights.diagnosis === 'string' &&
     typeof value.aiInsights.likelyCause === 'string' &&
     typeof value.aiInsights.nextStep === 'string' &&
     (value.rollbackSimulation === undefined || isRollbackSimulation(value.rollbackSimulation))

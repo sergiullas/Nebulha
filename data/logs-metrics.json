@@ -28,40 +28,40 @@
       }
     ],
     "aiInsights": {
-      "summary": "Production instability started shortly after deployment v1.24.",
       "likelyCause": "Timeout configuration change is the most likely trigger.",
-      "nextStep": "Roll back or compare timeout settings against the last stable release."
+      "nextStep": "Compare timeout settings with the last stable release or roll back.",
+      "diagnosis": "Production instability started shortly after deployment v1.24."
     },
     "dependencies": [
       {
         "name": "Payments DB",
         "provider": "AWS",
         "health": "Critical",
-        "metadata": "RDS PostgreSQL · us-east-1 · v14.9"
+        "metadata": "RDS PostgreSQL \u00b7 us-east-1 \u00b7 v14.9"
       },
       {
         "name": "Auth Service",
         "provider": "Internal",
         "health": "Degraded",
-        "metadata": "Internal microservice · us-east-1 · v2.3.1"
+        "metadata": "Internal microservice \u00b7 us-east-1 \u00b7 v2.3.1"
       },
       {
         "name": "Fraud Detection",
         "provider": "Internal",
         "health": "Healthy",
-        "metadata": "Internal microservice · us-east-1 · v1.8.0"
+        "metadata": "Internal microservice \u00b7 us-east-1 \u00b7 v1.8.0"
       },
       {
         "name": "Notification Gateway",
         "provider": "GCP",
         "health": "Healthy",
-        "metadata": "Pub/Sub · us-central1 · managed"
+        "metadata": "Pub/Sub \u00b7 us-central1 \u00b7 managed"
       },
       {
         "name": "Secrets Manager",
         "provider": "AWS",
         "health": "Healthy",
-        "metadata": "Secrets Manager · us-east-1 · managed"
+        "metadata": "Secrets Manager \u00b7 us-east-1 \u00b7 managed"
       },
       {
         "name": "Checkout UI",
@@ -111,28 +111,28 @@
       }
     ],
     "aiInsights": {
-      "summary": "Operational baseline remains stable in production.",
       "likelyCause": "No incident signal detected.",
-      "nextStep": "Keep observing routine metrics and deployment trends."
+      "nextStep": "Keep observing routine metrics and deployment trends.",
+      "diagnosis": "Operational baseline remains stable in production."
     },
     "dependencies": [
       {
         "name": "BigQuery",
         "provider": "GCP",
         "health": "Healthy",
-        "metadata": "Analytics warehouse · us-central1 · managed"
+        "metadata": "Analytics warehouse \u00b7 us-central1 \u00b7 managed"
       },
       {
         "name": "Cloud Storage",
         "provider": "GCP",
         "health": "Healthy",
-        "metadata": "Object storage · us-central1 · managed"
+        "metadata": "Object storage \u00b7 us-central1 \u00b7 managed"
       },
       {
         "name": "Auth Service",
         "provider": "Internal",
         "health": "Healthy",
-        "metadata": "Internal microservice · us-east-1 · v2.3.1"
+        "metadata": "Internal microservice \u00b7 us-east-1 \u00b7 v2.3.1"
       }
     ]
   }
