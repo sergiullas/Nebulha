@@ -10,9 +10,9 @@ type ApplicationWorkspaceClientProps = {
   currentEnvironment: string;
 };
 
-type WorkspaceTab = 'Overview' | 'Logs & metrics';
+type WorkspaceTab = 'Overview' | 'Metrics' | 'Logs';
 
-const tabs: WorkspaceTab[] = ['Overview', 'Logs & metrics'];
+const tabs: WorkspaceTab[] = ['Overview', 'Metrics', 'Logs'];
 
 export function ApplicationWorkspaceClient({
   application,
@@ -40,18 +40,19 @@ export function ApplicationWorkspaceClient({
       <div className="workspace-frame">
         <header className="workspace-head">
           <div>
-            <p className="workspace-path">Applications / {application.name}</p>
+            <p className="workspace-path">ACME / {application.project} / {application.name}</p>
             <h1 className="workspace-title">{application.name}</h1>
             <div className="pill-row">
               <Badge variant={providerVariant}>{application.provider}</Badge>
               <Badge variant="env">{currentEnvironment}</Badge>
               <Badge variant={healthVariant}>{application.health === 'healthy' ? 'Healthy' : application.health === 'warning' ? 'Warning' : 'Critical'}</Badge>
+              <Badge variant="unknown">{application.type}</Badge>
               {application.activeIncident ? <Badge variant="incident">Incident active</Badge> : null}
             </div>
           </div>
         </header>
 
-        <div className="workspace-tabs" role="tablist" aria-label="Application sections">
+        <div className="workspace-tabs" role="tablist" aria-label="Service detail sections">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -68,44 +69,52 @@ export function ApplicationWorkspaceClient({
 
         <div className="workspace-grid">
           <div className="workspace-column">
-            <section className="workspace-card">
-              <h2 className="card-title">Incident context</h2>
-              <p className="detail-text">
-                {application.aiSummary ?? 'No incident summary available for this application.'}
-              </p>
-              <p className="detail-text">
-                Last deployment: {application.lastDeployment}
-              </p>
-            </section>
-
-            {activeTab === 'Logs & metrics' && logsMetrics ? (
+            {activeTab === 'Overview' ? (
               <>
                 <section className="workspace-card">
-                  <h2 className="card-title">Metrics</h2>
-                  <div className="metrics-grid">
-                    <div className="metric-card"><span className="section-label">Error rate</span><p>{logsMetrics.metrics.errorRate}</p></div>
-                    <div className="metric-card"><span className="section-label">Latency P95</span><p>{logsMetrics.metrics.latencyP95}</p></div>
-                    <div className="metric-card"><span className="section-label">Failed requests</span><p>{logsMetrics.metrics.failedRequests}</p></div>
-                    <div className="metric-card"><span className="section-label">Deployment</span><p>{logsMetrics.metrics.deploymentVersion}</p></div>
-                  </div>
+                  <h2 className="card-title">Service context</h2>
+                  <p className="detail-text">Owner: {application.owner}</p>
+                  <p className="detail-text">Primary environment: {application.environment}</p>
+                  <p className="detail-text">Last deployment: {application.lastDeployment}</p>
                 </section>
 
                 <section className="workspace-card">
-                  <h2 className="card-title">Recent logs</h2>
-                  <ul className="logs-list">
-                    {logsMetrics.logs.map((entry) => (
-                      <li key={`${entry.timestamp}-${entry.message}`}>
-                        <strong>[{entry.level}]</strong> {entry.message}
-                      </li>
-                    ))}
-                  </ul>
+                  <h2 className="card-title">Incident summary (AI)</h2>
+                  <p className="detail-text">
+                    {application.aiSummary ?? 'No incident summary available for this service.'}
+                  </p>
                 </section>
               </>
             ) : null}
 
-            {activeTab === 'Logs & metrics' && !logsMetrics ? (
+            {activeTab === 'Metrics' && logsMetrics ? (
               <section className="workspace-card">
-                <h2 className="card-title">Logs & metrics unavailable</h2>
+                <h2 className="card-title">Metrics</h2>
+                <div className="metrics-grid metrics-grid--compact">
+                  <div className="metric-card"><span className="section-label">Error rate</span><p>{logsMetrics.metrics.errorRate}</p></div>
+                  <div className="metric-card"><span className="section-label">Latency P95</span><p>{logsMetrics.metrics.latencyP95}</p></div>
+                  <div className="metric-card"><span className="section-label">Failed requests</span><p>{logsMetrics.metrics.failedRequests}</p></div>
+                  <div className="metric-card"><span className="section-label">Deployment</span><p>{logsMetrics.metrics.deploymentVersion}</p></div>
+                </div>
+              </section>
+            ) : null}
+
+            {activeTab === 'Logs' && logsMetrics ? (
+              <section className="workspace-card">
+                <h2 className="card-title">Recent logs</h2>
+                <ul className="logs-list">
+                  {logsMetrics.logs.map((entry) => (
+                    <li key={`${entry.timestamp}-${entry.message}`}>
+                      <strong>[{entry.level}]</strong> {entry.message}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {(activeTab === 'Metrics' || activeTab === 'Logs') && !logsMetrics ? (
+              <section className="workspace-card">
+                <h2 className="card-title">Evidence unavailable</h2>
                 <p className="detail-text">This record failed validation. Check mocked data integrity.</p>
               </section>
             ) : null}
