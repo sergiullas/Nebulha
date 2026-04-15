@@ -95,6 +95,9 @@ const isCloudApplication = (value: unknown): value is CloudApplication => {
     isHealthStatus(value.health) &&
     typeof value.lastDeployment === 'string' &&
     typeof value.activeIncident === 'boolean' &&
+    typeof value.owner === 'string' &&
+    typeof value.type === 'string' &&
+    isStringArray(value.tags) &&
     (value.aiSummary === undefined || typeof value.aiSummary === 'string') &&
     (value.recommendedAction === undefined || typeof value.recommendedAction === 'string')
   );

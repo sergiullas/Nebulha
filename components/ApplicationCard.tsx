@@ -11,23 +11,35 @@ export function ApplicationCard({ app }: ApplicationCardProps) {
   const healthVariant = app.health === 'healthy' ? 'healthy' : app.health === 'critical' ? 'critical' : 'degraded';
 
   return (
-    <Link className="app-card" href={`/app/${app.id}`}>
-      <div className="app-card__breadcrumb">
-        {app.organization} / {app.project}
+    <article className="service-row" role="row">
+      <div>
+        <h2 className="service-row__name">{app.name}</h2>
+        <p className="service-row__context">{app.organization} / {app.project}</p>
       </div>
-      <h2 className="app-card__name">{app.name}</h2>
-      <div className="app-card__badges">
-        <Badge variant={providerVariant}>{app.provider}</Badge>
+
+      <div>
+        <div className="service-row__badges">
+          <Badge variant={providerVariant}>{app.provider}</Badge>
+          <Badge variant="unknown">{app.type}</Badge>
+          <Badge variant="unknown">Owner: {app.owner}</Badge>
+        </div>
+        {app.tags.length > 0 ? <p className="service-row__tags">Tags: {app.tags.join(', ')}</p> : null}
+      </div>
+
+      <div>
         <Badge variant="env">{app.environment}</Badge>
-        <Badge variant={healthVariant}>{app.health === 'warning' ? 'Degraded' : app.health === 'healthy' ? 'Healthy' : 'Critical'}</Badge>
-        {app.activeIncident && <Badge variant="incident">Incident Active</Badge>}
       </div>
-      <div className="app-card__deployment">Last deployment: {app.lastDeployment}</div>
-      {app.activeIncident && app.aiSummary && (
-        <p className="app-card__insight">
-          <span className="app-card__insight-prefix">AI Insight:</span> {app.aiSummary}
-        </p>
-      )}
-    </Link>
+
+      <div className="service-row__status">
+        <Badge variant={healthVariant}>{app.health === 'warning' ? 'Warning' : app.health === 'healthy' ? 'Healthy' : 'Critical'}</Badge>
+        {app.activeIncident ? <span className="service-row__incident">Incident</span> : null}
+      </div>
+
+      <p className="service-row__deployment">{app.lastDeployment}</p>
+
+      <Link className="service-row__action" href={`/app/${app.id}`}>
+        Open service
+      </Link>
+    </article>
   );
 }

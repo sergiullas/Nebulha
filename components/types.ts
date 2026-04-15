@@ -14,6 +14,9 @@ export type CloudApplication = {
   health: HealthStatus;
   lastDeployment: string;
   activeIncident: boolean;
+  owner: string;
+  type: string;
+  tags: string[];
   aiSummary?: string;
   recommendedAction?: string;
 };

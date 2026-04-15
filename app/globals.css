@@ -2070,3 +2070,110 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── IDP services inventory (phase 1) ── */
+
+.services-header {
+  margin-bottom: var(--space-4);
+}
+
+.services-eyebrow {
+  margin: 0 0 var(--space-1);
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.services-list {
+  background: var(--bg-primary);
+  border: var(--border-width) solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.services-list__head,
+.service-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.6fr) minmax(200px, 1.4fr) 110px 120px 120px 120px;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) var(--space-4);
+}
+
+.services-list__head {
+  border-bottom: var(--border-width) solid var(--border-default);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.service-row {
+  border-bottom: var(--border-width) solid var(--border-default);
+}
+
+.service-row:last-child {
+  border-bottom: 0;
+}
+
+.service-row__name {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.service-row__context,
+.service-row__deployment,
+.service-row__tags {
+  margin: var(--space-1) 0 0;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.service-row__badges {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.service-row__status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.service-row__incident {
+  color: var(--incident-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.service-row__action {
+  align-self: center;
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.service-row__action:hover {
+  border-color: var(--border-medium);
+}
+
+.metrics-grid--compact {
+  padding: 0;
+  margin: 0;
+}
+
+@media (max-width: 1080px) {
+  .services-list__head {
+    display: none;
+  }
+
+  .service-row {
+    grid-template-columns: 1fr;
+  }
+}

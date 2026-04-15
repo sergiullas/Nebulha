@@ -6,12 +6,22 @@
     "project": "Payments Revamp",
     "provider": "AWS",
     "environment": "prod",
-    "environments": ["dev", "staging", "prod"],
+    "environments": [
+      "dev",
+      "staging",
+      "prod"
+    ],
     "health": "critical",
     "lastDeployment": "18m ago",
     "activeIncident": true,
     "aiSummary": "Error rate increased after deployment v1.24. Likely timeout regression.",
-    "recommendedAction": "Review timeout configuration or roll back to the previous stable version."
+    "recommendedAction": "Review timeout configuration or roll back to the previous stable version.",
+    "owner": "Payments Team",
+    "type": "backend-api",
+    "tags": [
+      "payments",
+      "tier-1"
+    ]
   },
   {
     "id": "forecast-engine",
@@ -20,11 +30,20 @@
     "project": "Analytics",
     "provider": "GCP",
     "environment": "prod",
-    "environments": ["dev", "prod"],
+    "environments": [
+      "dev",
+      "prod"
+    ],
     "health": "healthy",
     "lastDeployment": "1d ago",
     "activeIncident": false,
     "aiSummary": "No active anomalies detected in current release.",
-    "recommendedAction": "Continue standard monitoring cadence."
+    "recommendedAction": "Continue standard monitoring cadence.",
+    "owner": "Forecasting Team",
+    "type": "data-service",
+    "tags": [
+      "analytics",
+      "batch"
+    ]
   }
 ]
